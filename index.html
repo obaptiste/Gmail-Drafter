@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail Housing Draft Creator</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .auth-section {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .auth-section button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .auth-section button:hover {
+            background: #357ae8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        .input-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .format-hint {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .results h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .result-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .result-item.success {
+            border-left: 3px solid #4caf50;
+        }
+        
+        .result-item.error {
+            border-left: 3px solid #f44336;
+        }
+        
+        .status-icon {
+            font-size: 20px;
+        }
+        
+        .result-text {
+            flex: 1;
+            font-size: 14px;
+        }
+        
+        .result-address {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .result-agent {
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .tracker-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f4ff;
+            border-radius: 8px;
+        }
+        
+        .tracker-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .tracker-table {
+            width: 100%;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            font-size: 13px;
+        }
+        
+        .tracker-table th {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .tracker-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .tracker-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .download-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .download-btn:hover {
+            background: #45a049;
+        }
+        
+        .user-info {
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-email {
+            font-weight: 600;
+            color: #2e7d32;
+        }
+        
+        .logout-btn {
+            padding: 8px 16px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .logout-btn:hover {
+            background: #da190b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 Gmail Housing Draft Creator</h1>
+            <p>Create Gmail drafts for your property enquiries in seconds</p>
+        </div>
+        
+        <div class="content">
+            <div id="authSection" class="auth-section">
+                <h2 style="margin-bottom: 20px; color: #333;">Connect Your Gmail</h2>
+                <p style="margin-bottom: 30px; color: #666;">Sign in to create draft emails directly in your Gmail inbox</p>
+                <button onclick="handleAuthClick()">Sign in with Google</button>
+            </div>
+            
+            <div id="mainSection" style="display: none;">
+                <div class="user-info">
+                    <span class="user-email" id="userEmail"></span>
+                    <button class="logout-btn" onclick="handleSignoutClick()">Sign Out</button>
+                </div>
+                
+                <div class="input-section">
+                    <label>📋 Property List</label>
+                    <textarea id="propertyInput" placeholder="Paste your property list here...
+
+Example Text Format:
+Bower Place, Maidstone ME16, £700, Wards Maidstone, Furnished, £808, 31 Oct 2025
+High Street, Rainham ME8, £700, Regal Estates, Unfurnished, £801.92, Immediate
+
+Or JSON Format:
+[
+  {
+    &quot;address&quot;: &quot;Bower Place&quot;,
+    &quot;area&quot;: &quot;Maidstone ME16&quot;,
+    &quot;rent&quot;: &quot;£700 pcm&quot;,
+    &quot;agent&quot;: &quot;Wards Maidstone&quot;,
+    &quot;furnished&quot;: &quot;Furnished&quot;,
+    &quot;deposit&quot;: &quot;£808&quot;,
+    &quot;availability&quot;: &quot;31 Oct 2025&quot;
+  }
+]"></textarea>
+                    <div class="format-hint">Supports comma-separated text or JSON format</div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="createDrafts()" id="createBtn">
+                        ✉️ Create Gmail Drafts
+                    </button>
+                    <button class="btn-secondary" onclick="clearAll()">
+                        🗑️ Clear All
+                    </button>
+                </div>
+                
+                <div id="loadingSection" class="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Creating drafts in your Gmail...</p>
+                </div>
+                
+                <div id="resultsSection" style="display: none;"></div>
+                
+                <div id="trackerSection" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID'; // User needs to replace this
+        const API_KEY = 'YOUR_GOOGLE_API_KEY'; // User needs to replace this
+        const SCOPES = 'https://www.googleapis.com/auth/gmail.compose';
+        
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
+        let accessToken = null;
+        let userEmail = '';
+        let propertyTracker = [];
+
+        // Initialize GAPI
+        function gapiLoaded() {
+            gapi.load('client', initializeGapiClient);
+        }
+
+        async function initializeGapiClient() {
+            await gapi.client.init({
+                apiKey: API_KEY,
+                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest'],
+            });
+            gapiInited = true;
+        }
+
+        // Initialize GIS
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: '', // Will be set in handleAuthClick
+            });
+            gisInited = true;
+        }
+
+        function handleAuthClick() {
+            tokenClient.callback = async (resp) => {
+                if (resp.error !== undefined) {
+                    throw (resp);
+                }
+                accessToken = gapi.client.getToken().access_token;
+                
+                // Get user email
+                const response = await gapi.client.gmail.users.getProfile({
+                    userId: 'me'
+                });
+                userEmail = response.result.emailAddress;
+                
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('mainSection').style.display = 'block';
+                document.getElementById('userEmail').textContent = `✅ Connected: ${userEmail}`;
+            };
+
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
+        }
+
+        function handleSignoutClick() {
+            const token = gapi.client.getToken();
+            if (token !== null) {
+                google.accounts.oauth2.revoke(token.access_token);
+                gapi.client.setToken('');
+                accessToken = null;
+                userEmail = '';
+                propertyTracker = [];
+                
+                document.getElementById('authSection').style.display = 'block';
+                document.getElementById('mainSection').style.display = 'none';
+                document.getElementById('propertyInput').value = '';
+                document.getElementById('resultsSection').style.display = 'none';
+                document.getElementById('trackerSection').style.display = 'none';
+            }
+        }
+
+        function parsePropertyList(input) {
+            try {
+                // Try parsing as JSON first
+                const jsonData = JSON.parse(input);
+                return jsonData.map(prop => ({
+                    address: prop.address || prop.property || '',
+                    area: prop.area || '',
+                    rent: prop.rent || '',
+                    agent: prop.agent || '',
+                    furnished: prop.furnished || '',
+                    deposit: prop.deposit || '',
+                    availability: prop.availability || prop.available || ''
+                }));
+            } catch (e) {
+                // Parse as comma-separated text
+                const lines = input.trim().split('\n').filter(line => line.trim());
+                return lines.map(line => {
+                    const parts = line.split(',').map(p => p.trim());
+                    return {
+                        address: parts[0] || '',
+                        area: parts[1] || '',
+                        rent: parts[2] || '',
+                        agent: parts[3] || '',
+                        furnished: parts[4] || '',
+                        deposit: parts[5] || '',
+                        availability: parts[6] || ''
+                    };
+                });
+            }
+        }
+
+        function generateEmailBody(property) {
+            const agentName = property.agent.split('–')[0].trim();
+            
+            return `Dear ${agentName},
+
+I'm interested in the property at ${property.address}, ${property.area} (${property.rent}, ${property.furnished.toLowerCase()}, ${property.availability ? 'available ' + property.availability : 'immediate availability'}).
+
+Could you confirm whether the landlord would consider tenants who receive Universal Credit (housing element)? I can provide references, Right-to-Rent documents, and award letters. Medway Council's Private Rented Sector scheme can also assist with deposit and rent in advance if needed.
+
+I'm ready to move and can view this week, daytime or early evening. Please let me know if this property is still available and if we can arrange a viewing.
+
+Kind regards,
+Oris John-Baptiste
+07494 219659`;
+        }
+
+        function createEmailDraft(subject, body, to = '') {
+            const email = [
+                `To: ${to}`,
+                'Content-Type: text/plain; charset=utf-8',
+                'MIME-Version: 1.0',
+                `Subject: ${subject}`,
+                '',
+                body
+            ].join('\n');
+
+            const encodedEmail = btoa(unescape(encodeURIComponent(email)))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+
+            return gapi.client.gmail.users.drafts.create({
+                userId: 'me',
+                resource: {
+                    message: {
+                        raw: encodedEmail
+                    }
+                }
+            });
+        }
+
+        async function createDrafts() {
+            const input = document.getElementById('propertyInput').value;
+            
+            if (!input.trim()) {
+                alert('Please enter property information');
+                return;
+            }
+
+            const properties = parsePropertyList(input);
+            
+            if (properties.length === 0) {
+                alert('No valid properties found');
+                return;
+            }
+
+            document.getElementById('createBtn').disabled = true;
+            document.getElementById('loadingSection').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+
+            const results = [];
+            propertyTracker = [];
+
+            for (const property of properties) {
+                try {
+                    const subject = `Enquiry – Studio/1-bed at ${property.address}, ${property.area}`;
+                    const body = generateEmailBody(property);
+                    
+                    await createEmailDraft(subject, body);
+                    
+                    results.push({
+                        success: true,
+                        property: property
+                    });
+
+                    propertyTracker.push({
+                        date: new Date().toLocaleDateString('en-GB'),
+                        property: `${property.address}, ${property.area}`,
+                        agent: property.agent,
+                        rent: property.rent,
+                        action: 'Draft created',
+                        status: 'Awaiting send',
+                        notes: ''
+                    });
+
+                } catch (error) {
+                    results.push({
+                        success: false,
+                        property: property,
+                        error: error.message
+                    });
+                }
+            }
+
+            displayResults(results);
+            displayTracker();
+            
+            document.getElementById('loadingSection').style.display = 'none';
+            document.getElementById('createBtn').disabled = false;
+        }
+
+        function displayResults(results) {
+            const successCount = results.filter(r => r.success).length;
+            const totalCount = results.length;
+
+            let html = `
+                <div class="results">
+                    <h3>✅ Draft Creation Complete</h3>
+                    <p style="margin-bottom: 15px; color: #666;">
+                        Successfully created <strong>${successCount} of ${totalCount}</strong> Gmail drafts
+                    </p>
+            `;
+
+            results.forEach(result => {
+                if (result.success) {
+                    html += `
+                        <div class="result-item success">
+                            <span class="status-icon">✅</span>
+                            <div class="result-text">
+                                <div class="result-address">${result.property.address}, ${result.property.area}</div>
+                                <div class="result-agent">${result.property.agent} · ${result.property.rent}</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="result-item error">
+                            <span class="status-icon">❌</span>
+                            <div class="result-text">
+                                <div class="result-address">${result.property.address}, ${result.property.area}</div>
+                                <div class="result-agent">Error: ${result.error}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            html += '</div>';
+
+            document.getElementById('resultsSection').innerHTML = html;
+            document.getElementById('resultsSection').style.display = 'block';
+        }
+
+        function displayTracker() {
+            if (propertyTracker.length === 0) {
+                document.getElementById('trackerSection').style.display = 'none';
+                return;
+            }
+
+            let html = `
+                <div class="tracker-section">
+                    <h3>📊 Property Tracker</h3>
+                    <table class="tracker-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Property</th>
+                                <th>Agent</th>
+                                <th>Rent</th>
+                                <th>Action</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            propertyTracker.forEach(item => {
+                html += `
+                    <tr>
+                        <td>${item.date}</td>
+                        <td>${item.property}</td>
+                        <td>${item.agent}</td>
+                        <td>${item.rent}</td>
+                        <td>${item.action}</td>
+                        <td>${item.status}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                    <button class="download-btn" onclick="downloadTracker()">💾 Download Tracker (CSV)</button>
+                </div>
+            `;
+
+            document.getElementById('trackerSection').innerHTML = html;
+            document.getElementById('trackerSection').style.display = 'block';
+        }
+
+        function downloadTracker() {
+            const csv = [
+                ['Date', 'Property', 'Agent', 'Rent', 'Action', 'Status', 'Notes'],
+                ...propertyTracker.map(item => [
+                    item.date,
+                    item.property,
+                    item.agent,
+                    item.rent,
+                    item.action,
+                    item.status,
+                    item.notes
+                ])
+            ].map(row => row.join(',')).join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `housing-tracker-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function clearAll() {
+            if (confirm('Clear all input and results?')) {
+                document.getElementById('propertyInput').value = '';
+                document.getElementById('resultsSection').style.display = 'none';
+                document.getElementById('trackerSection').style.display = 'none';
+                propertyTracker = [];
+            }
+        }
+
+        // Load the APIs
+        window.onload = function() {
+            const script1 = document.createElement('script');
+            script1.src = 'https://apis.google.com/js/api.js';
+            script1.onload = gapiLoaded;
+            document.body.appendChild(script1);
+
+            const script2 = document.createElement('script');
+            script2.src = 'https://accounts.google.com/gsi/client';
+            script2.onload = gisLoaded;
+            document.body.appendChild(script2);
+        };
+    </script>
+</body>
+</html>
